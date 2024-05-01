@@ -1,0 +1,63 @@
+name: 'Backend Continuous Integration'
+on:
+  workflow_dispatch:
+  
+  pull_request:
+    branches:
+      - main
+
+env:
+  PYTHON_VERSION: '3.10'
+
+jobs:
+  lint:
+    name: 'Lint'
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
+    steps:
+      # Check out the code to the runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pipenv' 
+      
+      - name: Install dependencies
+        run: |
+          cd backend && curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          pipenv install
+
+      - name: Install flake8 using pipenv
+        run: |
+          cd backend && pipenv install flake8
+
+      - name: Lint using flake8
+        run: cd backend && pipenv run flake8 .
+
+  test:
+    name: 'Test'
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
+    steps:
+      # Check out the code to the runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pipenv' 
+      
+      - name: Install dependencies
+        run: |
+          cd backend && curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          pipenv install
+
+      - name: Run test
+        run: cd backend && pipenv run test

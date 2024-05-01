@@ -1,0 +1,68 @@
+name: 'Frontend Continuous Deployment'
+on:
+  workflow_dispatch:
+  
+  push:
+    branches:
+      - main
+
+env:
+  NODE_VERSION: '22.0.0'
+  AWS_REGION: 'aws-region-1'
+
+
+jobs:
+  test:
+    name: 'Test'
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
+    steps:
+      # Check out the code to the runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup Node.Js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install npm dependency
+        run: cd frontend && npm ci
+
+      - name: run test
+        run: cd frontend && npm test
+
+  build:
+    name: 'Build'
+    needs: [test]
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
+    steps:
+      # Check out the code to the runner
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Configure AWS Credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4 
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/my-github-actions-role
+          aws-region: ${{ env.AWS_REGION }} 
+
+      # Login to AWS ECR - Public
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build, tag, and push docker image to Amazon ECR Public
+        env:
+          REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          REGISTRY_ALIAS: my-ecr-public-registry-alias
+          REPOSITORY: frontend
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG

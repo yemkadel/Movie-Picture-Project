@@ -8,7 +8,7 @@ on:
 
 env:
   NODE_VERSION: '22.0.0'
-  AWS_REGION: 'aws-region-1'
+  AWS_REGION: 'us-east-1'
 
 
 jobs:

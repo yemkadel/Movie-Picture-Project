@@ -73,5 +73,5 @@ jobs:
 
       - name: Deploy frontend to Kubernetes cluster
         run: |
-          cd frontend && echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
-          kubectl apply -f k8s/deployment.yaml --kubeconfig=kubeconfig.yaml
+          cd frontend/k8s && echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
+          kubectl apply -f deployment.yaml --kubeconfig=kubeconfig.yaml

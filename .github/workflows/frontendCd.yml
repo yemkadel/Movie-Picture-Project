@@ -70,6 +70,8 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
+
+      - name: check version  
         run: kubectl version
 
       - name: Deploy frontend to Kubernetes cluster

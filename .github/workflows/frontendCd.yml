@@ -72,14 +72,11 @@ jobs:
           version: 'latest'
         id: install
 
-      - uses: azure/k8s-set-context@v4
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
-
       - name: Deploy frontend to Kubernetes cluster
         run: |
-          cd frontend
-          kubectl version 
+          touch $HOME/.kube/config
+          cd frontend 
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
+          cat ~/.kube/config
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/deployment.yaml

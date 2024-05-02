@@ -69,7 +69,7 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: '1.30.0'
+          version: 'latest'
         id: install
 
       - uses: azure/k8s-set-context@v4
@@ -79,6 +79,7 @@ jobs:
 
       - name: Deploy frontend to Kubernetes cluster
         run: |
-          cd frontend 
+          cd frontend
+          kubectl version 
           kubectl apply -f k8s/service.yaml
           kubectl apply -f k8s/deployment.yaml

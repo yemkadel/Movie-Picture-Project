@@ -69,7 +69,7 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.25'
+          version: 'latest'
 
       - name: Deploy frontend to Kubernetes cluster
         run: |

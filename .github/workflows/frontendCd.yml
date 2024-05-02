@@ -77,6 +77,5 @@ jobs:
           cd frontend 
           echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
           cat kubeconfig.yaml > $HOME/.kube/config
-          kubectl config view
           kubectl apply -f k8s/service.yaml --kubeconfig=kubeconfig.yaml
           kubectl apply -f k8s/deployment.yaml --kubeconfig=kubeconfig.yaml

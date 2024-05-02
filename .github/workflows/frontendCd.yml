@@ -69,7 +69,7 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'latest'
+          version: '1.30.0'
         id: install
 
       - uses: azure/k8s-set-context@v4

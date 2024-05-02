@@ -70,13 +70,8 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
-        id: install
 
       - name: Deploy frontend to Kubernetes cluster
         run: |
-          cd frontend 
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
-          cat ~/.kube/config
-          kubectl apply -f k8s/service.yaml
-          kubectl apply -f k8s/deployment.yaml
+          cd frontend && echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
+          kubectl apply -f k8s/deployment.yaml --kubeconfig=kubeconfig.yaml

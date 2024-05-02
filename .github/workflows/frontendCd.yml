@@ -74,8 +74,8 @@ jobs:
 
       - name: Deploy frontend to Kubernetes cluster
         run: |
-          touch $HOME/.kube/config
           cd frontend 
+          mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG_DATA }}" > $HOME/.kube/config
           cat ~/.kube/config
           kubectl apply -f k8s/service.yaml

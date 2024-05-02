@@ -66,12 +66,14 @@ jobs:
           cd frontend && docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: Deploy frontend to K8s cluster
-        uses: kodermax/kubectl-aws-eks@main
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: frontend
-          IMAGE_TAG: ${{ github.sha }}
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v2
         with:
-          args: set image deployment/$ECR_REPOSITORY $ECR_REPOSITORY=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          version: 'latest'
+        id: install
+
+      - name: Deploy frontend to Kubernetes cluster
+        run: |
+          cd frontend 
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
+          kubectl apply -f k8s/kustomization.yaml --kubeconfig=kubeconfig.yaml

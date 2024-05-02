@@ -76,4 +76,5 @@ jobs:
         run: |
           cd frontend 
           echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
-          kubectl apply -f k8s/kustomization.yaml --kubeconfig=kubeconfig.yaml
+          kubectl apply -f k8s/service.yaml --kubeconfig=kubeconfig.yaml
+          kubectl apply -f k8s/deployment.yaml --kubeconfig=kubeconfig.yaml

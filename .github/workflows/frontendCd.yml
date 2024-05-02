@@ -54,7 +54,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }} 
-          role-to-assume: arn:aws:iam::012791293853:role/my-github-actions-role
+          #role-to-assume: arn:aws:iam::012791293853:role/my-github-actions-role
 
       # Login to AWS ECR - Public
       - name: Login to Amazon ECR Public

@@ -75,7 +75,6 @@ jobs:
       - name: Deploy frontend to Kubernetes cluster
         run: |
           cd frontend 
-          aws eks update-kubeconfig --region us-east-1 --name cluster
-          kubectl version
-          kubectl apply -f k8s/service.yaml
-          kubectl apply -f k8s/deployment.yaml 
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
+          kubectl apply -f k8s/service.yaml --kubeconfig=kubeconfig.yaml
+          kubectl apply -f k8s/deployment.yaml --kubeconfig=kubeconfig.yaml

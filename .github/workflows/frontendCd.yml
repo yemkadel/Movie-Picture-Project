@@ -35,12 +35,8 @@ jobs:
 
   build:
     name: 'Build'
-    #needs: [test]
+    needs: [test]
     runs-on: ubuntu-latest   # Use the latest Ubuntu runner
-
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       # Check out the code to the runner
@@ -65,7 +61,17 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: frontend
-          IMAGE_TAG: '${{ github.sha }}'
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           cd frontend && docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-        #docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy frontend to K8s cluster
+        uses: kodermax/kubectl-aws-eks@main
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: frontend
+          IMAGE_TAG: ${{ github.sha }}
+        with:
+          args: set image deployment/$ECR_REPOSITORY $ECR_REPOSITORY=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

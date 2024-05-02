@@ -52,26 +52,15 @@ jobs:
           aws-region: ${{ env.AWS_REGION }} 
           role-to-assume: arn:aws:iam::012791293853:role/my-github-actions-role
 
-      # Login to AWS ECR
-      - name: Login to Amazon ECR 
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build, tag, and push docker image to Amazon ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: frontend
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          cd frontend && docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
 
-      - name: Deploy frontend to Kubernetes cluster
-        run: |
-          cd frontend/k8s && echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
-          kubectl apply -f deployment.yaml --kubeconfig=kubeconfig.yaml
+      - name: Check Kubernetes Server Version
+        run: kubectl version --short
+
+      - name: Check Kubernetes Client Version
+        run: kubectl version 

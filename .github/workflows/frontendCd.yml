@@ -61,7 +61,7 @@ jobs:
             REPOSITORY: frontend
             IMAGE_TAG: ${{ github.sha }}
           run: |
-            cd frontend && docker build-arg REACT_APP_MOVIE_API_URL=frontend.default.svc.cluster.local:5000 -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+            cd frontend && docker build-arg REACT_APP_MOVIE_API_URL=frontend.default.svc.cluster.local:5000 --tag=$REGISTRY/$REPOSITORY:$IMAGE_TAG .
             docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
   
         - name: Set up kubectl

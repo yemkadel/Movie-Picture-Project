@@ -31,3 +31,12 @@ jobs:
 
       - name: run test
         run: cd frontend && npm test
+
+  build:
+    name: 'Build'
+    runs-on: ubuntu-latest #Use the latest runner
+
+    steps:
+      # Test build
+      - name: Test build
+        run: echo 'test build'

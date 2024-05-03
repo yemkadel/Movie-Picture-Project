@@ -1,4 +1,4 @@
-name: 'Frontend Continuous Deployment'
+name: 'Backend Continuous Deployment'
 on:
   workflow_dispatch:
   
@@ -7,12 +7,37 @@ on:
       - main
 
 env:
-  NODE_VERSION: '22.0.0'
-  AWS_REGION: 'us-east-1'
-  REACT_APP_MOVIE_API_URL: 'frontend.default.svc.cluster.local:5000'
-
+  PYTHON_VERSION: '3.10'
 
 jobs:
+  lint:
+    name: 'Lint'
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
+    steps:
+      # Check out the code to the runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup Python
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pipenv' 
+      
+      - name: Install dependencies
+        run: |
+          cd backend && curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          pipenv install
+
+      - name: Install flake8 using pipenv
+        run: |
+          cd backend && pipenv install flake8
+
+      - name: Lint using flake8
+        run: cd backend && pipenv run flake8 .
+
   test:
     name: 'Test'
     runs-on: ubuntu-latest   # Use the latest Ubuntu runner
@@ -22,21 +47,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Setup Node.Js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # Setup Python
+      - name: Install Python
+        uses: actions/setup-python@v5
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pipenv' 
       
-      - name: Install npm dependency
-        run: cd frontend && npm ci
+      - name: Install dependencies
+        run: |
+          cd backend && curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+          pipenv install
 
-      - name: run test
-        run: cd frontend && npm test
+      - name: Run test
+        run: cd backend && pipenv run test
 
   build:
     name: 'Build'
-    needs: [test]
+    needs: [lint, test]
     runs-on: ubuntu-latest   # Use the latest Ubuntu runner
 
     steps:
@@ -61,10 +89,10 @@ jobs:
       - name: Build, tag, and push docker image to Amazon ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: frontend
+          REPOSITORY: backend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          cd frontend && docker build-arg REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }} -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          cd backend && docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Set up kubectl
@@ -76,12 +104,12 @@ jobs:
         run: |
           aws eks update-kubeconfig --region us-east-1 --name cluster
 
-      - name: Deploy frontend to Kubernetes cluster
+      - name: Deploy backend to Kubernetes cluster
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: frontend
+          REPOSITORY: backend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          cd frontend/k8s
-          kustomize edit set image frontend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
+          cd backend/k8s
+          kustomize edit set image backend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
           kustomize build | kubectl apply -f -

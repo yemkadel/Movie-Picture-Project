@@ -35,7 +35,7 @@ jobs:
 
   build:
     name: 'Build'
-    #needs: [test]
+    needs: [test]
     runs-on: ubuntu-latest   # Use the latest Ubuntu runner
 
     steps:
@@ -74,11 +74,13 @@ jobs:
       - name: configure kubeconfig  
         run: |
           aws eks update-kubeconfig --region us-east-1 --name cluster
-          kubectl version
 
       - name: Deploy frontend to Kubernetes cluster
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: frontend
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           cd frontend/k8s
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" > kubeconfig.yaml
-          kubectl apply -f service.yaml
-          kubectl apply -f deployment.yaml
+          kustomize edit set image frontend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
+          kustomize build | kubectl apply -f -

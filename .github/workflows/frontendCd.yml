@@ -9,7 +9,6 @@ on:
 env:
   NODE_VERSION: '22.0.0'
   AWS_REGION: 'us-east-1'
-  REACT_APP_MOVIE_API_URL: 'frontend.default.svc.cluster.local:5000'
 
 jobs:
   test:

@@ -34,7 +34,7 @@ jobs:
 
   build:
     name: 'Build'
-      #needs: [test]
+      needs: [test]
       runs-on: ubuntu-latest   # Use the latest Ubuntu runner
   
       steps:

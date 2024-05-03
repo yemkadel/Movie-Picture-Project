@@ -8,6 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.10'
+  AWS_REGION: 'us-east-1'
 
 jobs:
   lint:

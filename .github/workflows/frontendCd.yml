@@ -7,7 +7,6 @@ on:
       - main
 
 env:
-  NODE_VERSION: '22.0.0'
   AWS_REGION: 'us-east-1'
   REACT_APP_MOVIE_API_URL: 'frontend.default.svc.cluster.local:5000'
 
@@ -26,10 +25,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: latest
       
       - name: Install npm dependency
-        run: cd frontend && npm ci
+        run: |
+          cd frontend && nvm use
+          npm ci
 
       - name: run test
         run: cd frontend && npm test

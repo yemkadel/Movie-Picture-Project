@@ -29,8 +29,7 @@ jobs:
       
       - name: Install npm dependency
         run: |
-          cd frontend && nvm use
-          npm ci
+          cd frontend && npm ci
 
       - name: run test
         run: cd frontend && npm test

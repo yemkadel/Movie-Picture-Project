@@ -11,7 +11,6 @@ env:
   REACT_APP_MOVIE_API_URL: 'frontend.default.svc.cluster.local:5000'
   NODE_VERSION: '22.0.0'
 
-
 jobs:
   lint:
     name: 'Lint'
@@ -57,52 +56,22 @@ jobs:
 
   build:
     name: 'Build'
-    #needs: [test]
+    needs: [lint, test]
     runs-on: ubuntu-latest   # Use the latest Ubuntu runner
 
     steps:
       # Check out the code to the runner
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Configure AWS Credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4 
+      # Setup Node.Js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }} 
-          role-to-assume: arn:aws:iam::012791293853:role/my-github-actions-role
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install npm dependency
+        run: cd frontend && npm ci
 
-      # Login to AWS ECR
-      - name: Login to Amazon ECR 
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build, tag, and push docker image to Amazon ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: frontend
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          cd frontend && docker build-arg REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }} -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: configure kubeconfig  
-        run: |
-          aws eks update-kubeconfig --region us-east-1 --name cluster
-
-      - name: Deploy frontend to Kubernetes cluster
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: frontend
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          cd frontend/k8s
-          kustomize edit set image frontend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
-          kustomize build | kubectl apply -f -
+      - name: build 
+        run: cd frontend && npm run build

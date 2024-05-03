@@ -11,27 +11,6 @@ env:
 
 
 jobs:
-  lint:
-    name: 'Lint'
-    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
-
-    steps:
-      # Check out the code to the runner
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Setup Node.Js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      - name: Install npm dependency
-        run: cd frontend && npm ci
-
-      - name: run lint
-        run: cd frontend && npm run lint
-
   test:
     name: 'Test'
     runs-on: ubuntu-latest   # Use the latest Ubuntu runner

@@ -26,13 +26,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Restore cache
+      - name: cache
+        id: cache
         uses: actions/cache@v2
         with:
           path: frontend/.
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/package-lock.json') }}
       
       - name: Install npm dependency
+        if: steps.cache.outputs.cache-hit != true
         run: cd frontend && npm ci
 
       - name: run lint
@@ -53,13 +55,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Restore cache
+      - name: cache
+        id: cache
         uses: actions/cache@v2
         with:
-          path: frontend/.
+          path: ~/.npm
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/package-lock.json') }}
       
       - name: Install npm dependency
+        if: steps.cache.outputs.cache-hit != true
         run: cd frontend && npm ci
 
       - name: run test
@@ -81,13 +85,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Restore cache
+      - name: cache
+        id: cache
         uses: actions/cache@v2
         with:
           path: frontend/.
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/package-lock.json') }}
       
       - name: Install npm dependency
+        if: steps.cache.outputs.cache-hit != true
         run: cd frontend && npm ci
 
       - name: build 

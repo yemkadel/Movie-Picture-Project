@@ -2,7 +2,7 @@ name: 'Frontend Continuous Deployment'
 on:
   workflow_dispatch:
   
-  #push: #
+  push: #
     branches:
       - main
 
@@ -63,7 +63,7 @@ jobs:
             IMAGE_TAG: ${{ github.sha }}
           run: |
             cd frontend
-            docker build --build-arg REACT_APP_MOVIE_API_URL=http://a86e6b55890d945c3a3a489a590bace5-95659232.us-east-1.elb.amazonaws.com -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+            docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
             docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
   
         - name: Set up kubectl

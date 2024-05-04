@@ -30,7 +30,7 @@ jobs:
         id: cache
         uses: actions/cache@v2
         with:
-          path: frontend/.
+          path: ~/.npm
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/package-lock.json') }}
       
       - name: Install npm dependency
@@ -89,7 +89,7 @@ jobs:
         id: cache
         uses: actions/cache@v2
         with:
-          path: frontend/.
+          path: ~/.npm
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/package-lock.json') }}
       
       - name: Install npm dependency

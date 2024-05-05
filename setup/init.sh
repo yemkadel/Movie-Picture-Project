@@ -3,6 +3,7 @@ set -e -o pipefail
 
 echo "Fetching IAM github-action-user ARN"
 userarn=$(aws iam get-user --user-name github-action-user | jq -r .User.Arn)
+rolearn=$(aws iam get-role --role-name my-github-actions-role | jq -r .Role.Arn)
 
 # Download tool for manipulating aws-auth
 echo "Downloading tool..."
@@ -11,6 +12,7 @@ chmod +x aws-iam-authenticator
 
 echo "Updating permissions"
 ./aws-iam-authenticator add user --userarn="${userarn}" --username=github-action-role --groups=system:masters --kubeconfig="$HOME"/.kube/config --prompt=false
+./aws-iam-authenticator add role --rolearn="${rolearn}" --username=my-github-actions-role --groups=system:masters --kubeconfig="$HOME"/.kube/config --prompt=false
 
 echo "Cleaning up"
 rm aws-iam-authenticator

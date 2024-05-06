@@ -25,13 +25,21 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pipenv' 
+
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
       
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != true
         run: |
           cd backend && curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
           pipenv install
 
       - name: Install flake8 using pipenv
+        if: steps.cache.outputs.cache-hit != true
         run: |
           cd backend && pipenv install flake8
 
@@ -53,8 +61,15 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pipenv' 
+
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
       
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != true
         run: |
           cd backend && curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
           pipenv install

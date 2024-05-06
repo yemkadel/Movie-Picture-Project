@@ -26,12 +26,18 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: cache
-        id: cache
-        uses: actions/cache@v2
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - uses: actions/cache@v3
+        id: cache 
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/package-lock.json') }}
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       
       - name: Install npm dependency
         if: steps.cache.outputs.cache-hit != true
@@ -55,15 +61,21 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Cache restore
-        uses: ylemkimon/cache-restore@v2
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - uses: actions/cache@v3
+        id: cache 
         with:
-          path: ~/.npm
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
       
       - name: Install npm dependency
+        if: steps.cache.outputs.cache-hit != true
         run: cd frontend && npm ci
 
       - name: run test

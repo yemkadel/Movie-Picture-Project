@@ -8,6 +8,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.10'
+  AWS_REGION: 'us-east-1'
 
 jobs:
   lint:
@@ -76,3 +77,36 @@ jobs:
 
       - name: Run test
         run: cd backend && pipenv run test
+
+  build:
+    name: 'Build'
+    needs: [lint, test]
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
+    steps:
+      # Check out the code to the runner
+        - name: Checkout repo
+          uses: actions/checkout@v3
+  
+        # Configure AWS Credentials
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4 
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.AWS_REGION }} 
+  
+        # Login to AWS ECR
+        - name: Login to Amazon ECR 
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v2
+  
+        - name: Build, tag, and push docker image to Amazon ECR.
+          env:
+            REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            REPOSITORY: frontend
+            IMAGE_TAG: ${{ github.sha }}
+            REACT_APP_MOVIE_API_URL: ${{ vars.REACT_APP_MOVIE_API_URL }}
+          run: |
+            cd frontend
+            docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
